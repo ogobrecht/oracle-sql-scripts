@@ -8,17 +8,18 @@ This script is new and not heavily tested. It will currently only work with a go
 - Every column name in a schema is unique and has a prefix (e.g. `customer_orders.co_id` or `users.u_name`)
 - That means also: You have for every table a different column prefix (`co_` or `u_` from the examples above)
 - Self references in a hierarchy need to follow this also (e.g. users.u_id, users.manager_u_id)
+- Does not support multi column primary keys as target of a foreign key (a standard n:m mapping table with a multi column pk is normally only the source of two or more foreign keys and should work)
 
 Usage
 -----
-- `@create_missing_foreign_key_indexes.sql ""` (all tables)
-- `@create_missing_foreign_key_indexes.sql "OEHR"` (only for tables prefixed with "OEHR")
+- `@create_missing_foreign_keys.sql ""` (all tables)
+- `@create_missing_foreign_keys.sql "OEHR"` (only for tables prefixed with "OEHR")
 
 Meta
 ----
 - Author: [Ottmar Gobrecht](https://ogobrecht.github.io)
 - Script: [create_missing_foreign_keys.sql](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/create_missing_foreign_keys.sql)
-- Last Update: 2020-05-29
+- Last Update: 2020-05-30
 
 */
 
