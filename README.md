@@ -5,6 +5,8 @@ This is a list of scripts that I am using mainly for data modeling and deploying
 Happy scripting\
 Ottmar
 
+- [Simple Example Deployment Script](example-usage/deploy.sql)
+
 - [Create Missing Foreign Key Indexes](create_missing_foreign_key_indexes.sql)
 - new, unfinished: [Create Missing Foreign Keys](create_missing_foreign_keys.sql)
 - [Disable All Foreign Key Constraints](disable_all_foreign_key_constraints.sql)
@@ -12,3 +14,7 @@ Ottmar
 - [Sync Sequence Values To Data](sync_sequence_values_to_data.sql)
 - [Unify Constraint Names](unify_constraint_names.sql)
 - [Unify Index Names](unify_index_names.sql)
+
+## Simple Example Deployment Script
+
+Since all
