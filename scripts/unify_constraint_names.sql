@@ -27,30 +27,50 @@ like V (with check option, on a view) or O (with read only, on a view) can not
 be renamed and they are created implicitly with their base objects (as far as I
 know).
 
+Parameter 1: table prefix
+
+- If null: Takes all tables of current schema into account
+- If not null: Use the given prefix to filter tables
+- Example: "CO" will be expanded to `table_name like 'CO\_%' escape '\'`
+
+Parameter 2: dry run
+
+- If null: Will do the intended script work
+- If not null: Will only report the intended script work and do nothing
+- Examples: "dry run", "test run", "do nothing", "report only" and "abc" do all the same: nothing
+
 Usage
 -----
-- `@unify_constraint_names.sql ""` (all constraints in current schema)
-- `@unify_constraint_names.sql "OEHR"` (only constraints from tables prefixed with "OEHR")
+- `@unify_constraint_names.sql "" ""` (all constraints in current schema, do the intended work)
+- `@unify_constraint_names.sql "" "dry run"` (all constraints in current schema, report only)
+- `@unify_constraint_names.sql "OEHR" ""` (only constraints from tables prefixed with "OEHR")
+- `@unify_constraint_names.sql "CO" "test"` (only constraints from tables prefixed with "CO", report only)
 
 Meta
 ----
 - Author: [Ottmar Gobrecht](https://ogobrecht.github.io)
-- Script: [unify_constraint_names.sql](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/unify_constraint_names.sql)
-- Last Update: 2020-03-25
+- Script: [unify_constraint_names.sql](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/scripts/unify_constraint_names.sql)
+- Last Update: 2020-06-01
 
 */
 
-set define on serveroutput on verify off feedback off
 prompt UNIFY CONSTRAINT NAMES
+set define on serveroutput on verify off feedback off
+variable table_prefix  varchar2(100)
+variable dry_run       varchar2(100)
+
 declare
-  v_prefix varchar2(100 char);
   v_count pls_integer := 0;
 begin
-  v_prefix := '&1';
-  if v_prefix is not null then
-    dbms_output.put_line('- for tables prefixed with "' || v_prefix || '"');
+  :table_prefix := '&1';
+  :dry_run      := '&2';
+  if :table_prefix is not null then
+    dbms_output.put_line('- for tables prefixed with "' || :table_prefix || '_"');
   else
     dbms_output.put_line('- for all tables');
+  end if;
+  if :dry_run is not null then
+    dbms_output.put_line('- dry run entered');
   end if;
   for i in (
 --------------------------------------------------------------------------------
@@ -81,7 +101,7 @@ with constraints_base as (
     left join user_tab_columns  utc on  ucc.table_name     = utc.table_name
                                     and ucc.column_name    = utc.column_name
   where
-    uc.table_name like case when v_prefix is not null then v_prefix || '\_%' else '%' end escape '\'
+    uc.table_name like case when :table_prefix is not null then :table_prefix || '\_%' else '%' end escape '\'
     and uc.constraint_type in ('C','P','U','R') -- only the types we can rename
     and uc.table_name not like 'BIN$%'
   group by
@@ -148,9 +168,15 @@ order by
   constraint_name
 --------------------------------------------------------------------------------
   ) loop
-    execute immediate i.ddl;
+    dbms_output.put_line('- ' || i.ddl);
+    if :dry_run is null then
+      execute immediate i.ddl;
+    end if;
     v_count := v_count + 1;
   end loop;
-  dbms_output.put_line('- ' || v_count || ' constraints renamed');
+
+  dbms_output.put_line('- ' || v_count || ' constraint'
+    || case when v_count != 1 then 's' end || ' '
+    || case when :dry_run is null then 'renamed' else 'reported' end);
 end;
 /
