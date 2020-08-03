@@ -11,30 +11,32 @@ This script is new and not heavily tested. It will currently only work with a go
 - Does not support multi column primary keys as target of a foreign key (a standard n:m mapping table with a multi column pk is normally only the source of two or more foreign keys and should work)
 - Does not provide an on delete clause - if you need to define one, please create the foreign key by yourself
 
-Parameter 1: table prefix
+Options
+-------
 
-- If null: Takes all tables of current schema into account
-- If not null: Use the given prefix to filter tables
-- Example: "CO" will be expanded to `table_name like 'CO\_%' escape '\'`
+The first parameter of the script can contain a JSON object with two keys:
 
-Parameter 2: dry run
-
-- If null: Will do the intended script work
-- If not null: Will only report the intended script work and do nothing
-- Examples: "dry run", "test run", "do nothing", "report only" and "abc" do all the same: nothing
+- table_prefix:
+  - If null: Takes all tables of current schema into account
+  - If not null: Use the given prefix to filter tables
+  - Example: "CO" will be expanded to `table_name like 'CO\_%' escape '\'`
+- dry_run:
+  - If null: Will do the intended script work
+  - If not null: Will only report the intended script work and do nothing
+  - Examples: "dry run", "test run", "do nothing", "report only" and "abc" do all the same: nothing
 
 Usage
 -----
-- `@create_missing_foreign_keys.sql "" ""` (all tables, do the intended work)
-- `@create_missing_foreign_keys.sql "" "dry run"` (all tables, report only)
-- `@create_missing_foreign_keys.sql "OEHR" ""` (only for tables prefixed with "OEHR")
-- `@create_missing_foreign_keys.sql "CO" "test"` (only for tables prefixed with "CO", report only)
+- `@create_missing_foreign_keys.sql '{ table_prefix:"",     dry_run:""     }'` (all tables, do the intended work)
+- `@create_missing_foreign_keys.sql '{ table_prefix:"",     dry_run:"true" }'` (all tables, report only)
+- `@create_missing_foreign_keys.sql '{ table_prefix:"OEHR", dry_run:""     }'` (only for tables prefixed with "OEHR")
+- `@create_missing_foreign_keys.sql '{ table_prefix:"CO",   dry_run:"test" }'` (only for tables prefixed with "CO", report only)
 
 Meta
 ----
 - Author: [Ottmar Gobrecht](https://ogobrecht.github.io)
 - Script: [create_missing_foreign_keys.sql](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/scripts/create_missing_foreign_keys.sql)
-- Last Update: 2020-06-01
+- Last Update: 2020-08-03
 
 */
 
@@ -45,9 +47,11 @@ variable dry_run       varchar2(100)
 
 declare
   v_count pls_integer := 0;
+  options varchar2(4000);
 begin
-  :table_prefix := '&1';
-  :dry_run      := '&2';
+  options := '&1';
+  :table_prefix := json_value(options, '$.table_prefix');
+  :dry_run      := json_value(options, '$.dry_run');
   if :table_prefix is not null then
     dbms_output.put_line('- for tables prefixed with "' || :table_prefix || '_"');
   else

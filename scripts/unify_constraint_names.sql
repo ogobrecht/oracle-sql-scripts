@@ -27,30 +27,32 @@ like V (with check option, on a view) or O (with read only, on a view) can not
 be renamed and they are created implicitly with their base objects (as far as I
 know).
 
-Parameter 1: table prefix
+Options
+-------
 
-- If null: Takes all tables of current schema into account
-- If not null: Use the given prefix to filter tables
-- Example: "CO" will be expanded to `table_name like 'CO\_%' escape '\'`
+The first parameter of the script can contain a JSON object with two keys:
 
-Parameter 2: dry run
-
-- If null: Will do the intended script work
-- If not null: Will only report the intended script work and do nothing
-- Examples: "dry run", "test run", "do nothing", "report only" and "abc" do all the same: nothing
+- table_prefix:
+  - If null: Takes all tables of current schema into account
+  - If not null: Use the given prefix to filter tables
+  - Example: "CO" will be expanded to `table_name like 'CO\_%' escape '\'`
+- dry_run:
+  - If null: Will do the intended script work
+  - If not null: Will only report the intended script work and do nothing
+  - Examples: "dry run", "test run", "do nothing", "report only" and "abc" do all the same: nothing
 
 Usage
 -----
-- `@unify_constraint_names.sql "" ""` (all constraints in current schema, do the intended work)
-- `@unify_constraint_names.sql "" "dry run"` (all constraints in current schema, report only)
-- `@unify_constraint_names.sql "OEHR" ""` (only constraints from tables prefixed with "OEHR")
-- `@unify_constraint_names.sql "CO" "test"` (only constraints from tables prefixed with "CO", report only)
+- `@unify_constraint_names.sql '{ table_prefix:"",     dry_run:""     }'` (all tables, do the intended work)
+- `@unify_constraint_names.sql '{ table_prefix:"",     dry_run:"true" }'` (all tables, report only)
+- `@unify_constraint_names.sql '{ table_prefix:"OEHR", dry_run:""     }'` (only for tables prefixed with "OEHR")
+- `@unify_constraint_names.sql '{ table_prefix:"CO",   dry_run:"test" }'` (only for tables prefixed with "CO", report only)
 
 Meta
 ----
 - Author: [Ottmar Gobrecht](https://ogobrecht.github.io)
 - Script: [unify_constraint_names.sql](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/scripts/unify_constraint_names.sql)
-- Last Update: 2020-06-01
+- Last Update: 2020-08-03
 
 */
 
@@ -61,9 +63,11 @@ variable dry_run       varchar2(100)
 
 declare
   v_count pls_integer := 0;
+  options varchar2(4000);
 begin
-  :table_prefix := '&1';
-  :dry_run      := '&2';
+  options := '&1';
+  :table_prefix := json_value(options, '$.table_prefix');
+  :dry_run      := json_value(options, '$.dry_run');
   if :table_prefix is not null then
     dbms_output.put_line('- for tables prefixed with "' || :table_prefix || '_"');
   else

@@ -7,30 +7,32 @@ Set sequence values to the current max data values. This is done for implicit
 sequences (identity columns) and explicit sequences (used as column default
 value or in a trigger).
 
-Parameter 1: table prefix
+Options
+-------
 
-- If null: Takes all tables of current schema into account
-- If not null: Use the given prefix to filter tables
-- Example: "CO" will be expanded to `table_name like 'CO\_%' escape '\'`
+The first parameter of the script can contain a JSON object with two keys:
 
-Parameter 2: dry run
-
-- If null: Will do the intended script work
-- If not null: Will only report the intended script work and do nothing
-- Examples: "dry run", "test run", "do nothing", "report only" and "abc" do all the same: nothing
+- table_prefix:
+  - If null: Takes all tables of current schema into account
+  - If not null: Use the given prefix to filter tables
+  - Example: "CO" will be expanded to `table_name like 'CO\_%' escape '\'`
+- dry_run:
+  - If null: Will do the intended script work
+  - If not null: Will only report the intended script work and do nothing
+  - Examples: "dry run", "test run", "do nothing", "report only" and "abc" do all the same: nothing
 
 Usage
 -----
-- `@sync_sequence_values_to_data.sql "" ""` (for all tables, do the intended work)
-- `@sync_sequence_values_to_data.sql "" "dry run"` (for all tables, report only)
-- `@sync_sequence_values_to_data.sql "OEHR" ""` (only for tables prefixed with "OEHR")
-- `@sync_sequence_values_to_data.sql "CO" "test"` (only for tables prefixed with "CO", report only)
+- `@sync_sequence_values_to_data.sql '{ table_prefix:"",     dry_run:""     }'` (all tables, do the intended work)
+- `@sync_sequence_values_to_data.sql '{ table_prefix:"",     dry_run:"true" }'` (all tables, report only)
+- `@sync_sequence_values_to_data.sql '{ table_prefix:"OEHR", dry_run:""     }'` (only for tables prefixed with "OEHR")
+- `@sync_sequence_values_to_data.sql '{ table_prefix:"CO",   dry_run:"test" }'` (only for tables prefixed with "CO", report only)
 
 Meta
 ----
 - Author: [Ottmar Gobrecht](https://ogobrecht.github.io)
 - Script: [sync_sequence_values_to_data.sql](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/scripts/sync_sequence_values_to_data.sql)
-- Last Update: 2020-06-01
+- Last Update: 2020-08-03
 - Inspiration: https://stackoverflow.com/questions/51470/how-do-i-reset-a-sequence-in-oracle
 
 */
@@ -49,9 +51,11 @@ declare
   v_count_identity pls_integer := 0;
   v_count_default  pls_integer := 0;
   v_count_trigger  pls_integer := 0;
+  options varchar2(4000);
 begin
-  :table_prefix := '&1';
-  :dry_run      := '&2';
+  options := '&1';
+  :table_prefix := json_value(options, '$.table_prefix');
+  :dry_run      := json_value(options, '$.dry_run');
   if :table_prefix is not null then
     dbms_output.put_line('- for tables prefixed with "' || :table_prefix || '_"');
   else
