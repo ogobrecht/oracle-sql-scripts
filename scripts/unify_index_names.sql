@@ -30,16 +30,15 @@ The first parameter of the script can contain a JSON object with two keys:
   - If not null: Use the given prefix to filter tables
   - Example: "CO" will be expanded to `table_name like 'CO\_%' escape '\'`
 - dry_run:
-  - If null: Will do the intended script work
-  - If not null: Will only report the intended script work and do nothing
-  - Examples: "dry run", "test run", "do nothing", "report only" and "abc" do all the same: nothing
+  - If true: Will do the intended script work
+  - If false: Will only report the intended script work and do nothing
 
 Usage
 -----
-- `@unify_index_names.sql '{ table_prefix:"",     dry_run:""     }'` (all tables, do the intended work)
-- `@unify_index_names.sql '{ table_prefix:"",     dry_run:"true" }'` (all tables, report only)
-- `@unify_index_names.sql '{ table_prefix:"OEHR", dry_run:""     }'` (only for tables prefixed with "OEHR")
-- `@unify_index_names.sql '{ table_prefix:"CO",   dry_run:"test" }'` (only for tables prefixed with "CO", report only)
+- `@unify_index_names.sql '{ table_prefix: "",     dry_run: false }'` (all tables, do the intended work)
+- `@unify_index_names.sql '{ table_prefix: "",     dry_run: true  }'` (all tables, report only)
+- `@unify_index_names.sql '{ table_prefix: "OEHR", dry_run: false }'` (only for tables prefixed with "OEHR")
+- `@unify_index_names.sql '{ table_prefix: "CO",   dry_run: true  }'` (only for tables prefixed with "CO", report only)
 
 Meta
 ----
@@ -51,22 +50,22 @@ Meta
 
 prompt UNIFY INDEX NAMES
 set define on serveroutput on verify off feedback off
+variable options       varchar2(4000)
 variable table_prefix  varchar2(100)
 variable dry_run       varchar2(100)
 
 declare
   v_count pls_integer := 0;
-  options varchar2(4000);
 begin
-  options := '&1';
-  :table_prefix := json_value(options, '$.table_prefix');
-  :dry_run      := json_value(options, '$.dry_run');
+  :options      := '&1';
+  :table_prefix := json_value(:options, '$.table_prefix');
+  :dry_run      := json_value(:options, '$.dry_run');
   if :table_prefix is not null then
     dbms_output.put_line('- for tables prefixed with "' || :table_prefix || '_"');
   else
     dbms_output.put_line('- for all tables');
   end if;
-  if :dry_run is not null then
+  if :dry_run = 'true' then
     dbms_output.put_line('- dry run entered');
   end if;
   for i in (
@@ -190,7 +189,7 @@ order by
 --------------------------------------------------------------------------------
   ) loop
     dbms_output.put_line('- ' || i.ddl);
-    if :dry_run is null then
+    if :dry_run = 'false' then
       execute immediate i.ddl;
     end if;
     v_count := v_count + 1;
@@ -198,6 +197,6 @@ order by
 
   dbms_output.put_line('- ' || v_count || ' index'
     || case when v_count != 1 then 'es' end || ' '
-    || case when :dry_run is null then 'renamed' else 'reported' end);
+    || case when :dry_run = 'false' then 'renamed' else 'reported' end);
 end;
 /

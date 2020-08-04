@@ -17,16 +17,15 @@ The first parameter of the script can contain a JSON object with two keys:
   - If not null: Use the given prefix to filter tables
   - Example: "CO" will be expanded to `table_name like 'CO\_%' escape '\'`
 - dry_run:
-  - If null: Will do the intended script work
-  - If not null: Will only report the intended script work and do nothing
-  - Examples: "dry run", "test run", "do nothing", "report only" and "abc" do all the same: nothing
+  - If true: Will do the intended script work
+  - If false: Will only report the intended script work and do nothing
 
 Usage
 -----
-- `@sync_sequence_values_to_data.sql '{ table_prefix:"",     dry_run:""     }'` (all tables, do the intended work)
-- `@sync_sequence_values_to_data.sql '{ table_prefix:"",     dry_run:"true" }'` (all tables, report only)
-- `@sync_sequence_values_to_data.sql '{ table_prefix:"OEHR", dry_run:""     }'` (only for tables prefixed with "OEHR")
-- `@sync_sequence_values_to_data.sql '{ table_prefix:"CO",   dry_run:"test" }'` (only for tables prefixed with "CO", report only)
+- `@sync_sequence_values_to_data.sql '{ table_prefix: "",     dry_run: false }'` (all tables, do the intended work)
+- `@sync_sequence_values_to_data.sql '{ table_prefix: "",     dry_run: true  }'` (all tables, report only)
+- `@sync_sequence_values_to_data.sql '{ table_prefix: "OEHR", dry_run: false }'` (only for tables prefixed with "OEHR")
+- `@sync_sequence_values_to_data.sql '{ table_prefix: "CO",   dry_run: true  }'` (only for tables prefixed with "CO", report only)
 
 Meta
 ----
@@ -39,6 +38,7 @@ Meta
 
 prompt SYNC SEQUENCE VALUES TO DATA
 set define on serveroutput on verify off feedback off
+variable options       varchar2(4000)
 variable table_prefix  varchar2(100)
 variable dry_run       varchar2(100)
 
@@ -51,17 +51,16 @@ declare
   v_count_identity pls_integer := 0;
   v_count_default  pls_integer := 0;
   v_count_trigger  pls_integer := 0;
-  options varchar2(4000);
 begin
-  options := '&1';
-  :table_prefix := json_value(options, '$.table_prefix');
-  :dry_run      := json_value(options, '$.dry_run');
+  :options      := '&1';
+  :table_prefix := json_value(:options, '$.table_prefix');
+  :dry_run      := json_value(:options, '$.dry_run');
   if :table_prefix is not null then
     dbms_output.put_line('- for tables prefixed with "' || :table_prefix || '_"');
   else
     dbms_output.put_line('- for all tables');
   end if;
-  if :dry_run is not null then
+  if :dry_run = 'true' then
     dbms_output.put_line('- dry run entered');
   end if;
   for i in (
@@ -186,7 +185,7 @@ where
   ) loop
     dbms_output.put_line('- tab:' || i.table_name || ' col:' || i.column_name
       || ' seq:' || i.sequence_name || ' typ:' || i.source_type);
-    if :dry_run is not null then
+    if :dry_run = 'true' then
       case i.source_type
         when 'IDENTITY_COLUMN'     then v_count_identity := v_count_identity + 1;
         when 'COLUMN_DATA_DEFAULT' then v_count_default  := v_count_default  + 1;
@@ -243,20 +242,20 @@ where
     dbms_output.put_line('- ' || v_count_identity
       || ' implicit sequence' || case when v_count_identity != 1 then 's' end
       || ' (from identity columns) '
-      || case when :dry_run is null then 'synced to data' else 'reported' end);
+      || case when :dry_run = 'false' then 'synced to data' else 'reported' end);
   end if;
   if v_count_default != 0 then
     dbms_output.put_line('- ' || v_count_default
       || ' explicit sequence' || case when v_count_default != 1 then 's' end
       || ' (from column data defaults) '
-      || case when :dry_run is null then 'synced to data' else 'reported' end);
+      || case when :dry_run = 'false' then 'synced to data' else 'reported' end);
 
   end if;
   if v_count_trigger != 0 then
     dbms_output.put_line('- ' || v_count_trigger
       || ' explicit sequence' || case when v_count_trigger != 1 then 's' end
       || ' (from trigger sources) '
-      || case when :dry_run is null then 'synced to data' else 'reported' end);
+      || case when :dry_run = 'false' then 'synced to data' else 'reported' end);
   end if;
 end;
 /
