@@ -17,8 +17,9 @@ The first parameter of the script can contain a JSON object with two keys:
   - If not null: Use the given prefix to filter tables
   - Example: "CO" will be expanded to `table_name like 'CO\_%' escape '\'`
 - dry_run:
-  - If true: Will do the intended script work
-  - If false: Will only report the intended script work and do nothing
+  - If true, the script will do the intended work
+  - If false, the script will only report the intended work and do nothing
+  - If omitted, it will default to false
 
 Usage
 -----
@@ -30,8 +31,8 @@ Usage
 Meta
 ----
 - Author: [Ottmar Gobrecht](https://ogobrecht.github.io)
-- Script: [sync_sequence_values_to_data.sql](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/scripts/sync_sequence_values_to_data.sql)
-- Last Update: 2020-08-03
+- Script: [sync_sequence_values_to_data.sql …](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/scripts/)
+- Last Update: 2020-10-29
 - Inspiration: https://stackoverflow.com/questions/51470/how-do-i-reset-a-sequence-in-oracle
 
 */
@@ -54,7 +55,7 @@ declare
 begin
   :options      := '&1';
   :table_prefix := json_value(:options, '$.table_prefix');
-  :dry_run      := json_value(:options, '$.dry_run');
+  :dry_run      := nvl(json_value(:options, '$.dry_run'), 'false');
   if :table_prefix is not null then
     dbms_output.put_line('- for tables prefixed with "' || :table_prefix || '_"');
   else
