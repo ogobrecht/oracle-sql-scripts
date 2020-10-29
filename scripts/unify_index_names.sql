@@ -8,10 +8,10 @@ convention:
 
     <table_name>_<column_list>_<constraint_type>_IX
 
-To ensure distinct index names, up to three underscores are appended when
-names are already in use (rare cases, but possible). Each column in the column
-list is constructed by concatenating the character `C` with the column id in
-the table. The column list is ordered by the column position in the index.
+Each column in the column list is constructed by concatenating the character `C`
+with the column id in the table. The column list is ordered by the column
+position in the index. To ensure distinct constraint names we append numbers
+from 1 up to 9 if needed.
 
 Example index names:
 
@@ -30,8 +30,9 @@ The first parameter of the script can contain a JSON object with two keys:
   - If not null: Use the given prefix to filter tables
   - Example: "CO" will be expanded to `table_name like 'CO\_%' escape '\'`
 - dry_run:
-  - If true: Will do the intended script work
-  - If false: Will only report the intended script work and do nothing
+  - If true, the script will do the intended work
+  - If false, the script will only report the intended work and do nothing
+  - If omitted, it will default to false
 
 Usage
 -----
@@ -43,8 +44,8 @@ Usage
 Meta
 ----
 - Author: [Ottmar Gobrecht](https://ogobrecht.github.io)
-- Script: [unify_index_names.sql](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/scripts/unify_index_names.sql)
-- Last Update: 2020-08-03
+- Script: [unify_index_names.sql …](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/scripts/)
+- Last Update: 2020-10-29
 
 */
 
@@ -59,7 +60,7 @@ declare
 begin
   :options      := '&1';
   :table_prefix := json_value(:options, '$.table_prefix');
-  :dry_run      := json_value(:options, '$.dry_run');
+  :dry_run      := nvl(json_value(:options, '$.dry_run'), 'false');
   if :table_prefix is not null then
     dbms_output.put_line('- for tables prefixed with "' || :table_prefix || '_"');
   else
@@ -153,21 +154,16 @@ select
   table_name,
   index_name,
   new_index_name ||
-    -- Append underscore if previous one has the same name.
     case
-      when lead(new_index_name, 1) over(order by new_index_name, index_name) = new_index_name
-      then '_'
-    end ||
-    -- Append underscore if previous previous one has the same name.
-    case
-      when lead(new_index_name, 2) over(order by new_index_name, index_name) = new_index_name
-      then '_'
-    end ||
-    -- Append underscore if previous previous previous one has the same name.
-    -- We will stop here: Please check your constraints if you encounter more than three times the same resulting name ;-)
-    case
-      when lead(new_index_name, 3) over(order by new_index_name, index_name) = new_index_name
-      then '_'
+      when lead(new_index_name, 1) over(order by new_index_name, index_name) = new_index_name then '1'
+      when  lag(new_index_name, 8) over(order by new_index_name, index_name) = new_index_name then '9'
+      when  lag(new_index_name, 7) over(order by new_index_name, index_name) = new_index_name then '8'
+      when  lag(new_index_name, 6) over(order by new_index_name, index_name) = new_index_name then '7'
+      when  lag(new_index_name, 5) over(order by new_index_name, index_name) = new_index_name then '6'
+      when  lag(new_index_name, 4) over(order by new_index_name, index_name) = new_index_name then '5'
+      when  lag(new_index_name, 3) over(order by new_index_name, index_name) = new_index_name then '4'
+      when  lag(new_index_name, 2) over(order by new_index_name, index_name) = new_index_name then '3'
+      when  lag(new_index_name, 1) over(order by new_index_name, index_name) = new_index_name then '2'
     end
   as new_index_name
 from
