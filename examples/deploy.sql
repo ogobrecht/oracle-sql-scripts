@@ -3,24 +3,25 @@
 Example: Simple Deployment Script
 =================================
 
-This example deployment shows you how you can use some of the SQL scripts
-for easily creating your data models. You need only the basic table definition
-and the scripts handle the creation of the foreign keys and foreign key indexes
-and also the renaming of the constraints and indexes.
+This example deployment shows you how you can use some of the SQL scripts for
+easily creating your data models. You need only the basic table definition and
+the scripts handle the creation of the foreign keys and foreign key indexes and
+also the renaming of the constraints and indexes.
 
 For the foreign key creation you need to follow a naming convention - please
 have a look into the description of the script itself for more details.
 
-The options are always the same here in the four called scripts. The first
-parameter of the script can contain a JSON object with two keys:
+The options are always the same here in the called scripts. The first parameter
+of the script can contain a JSON object with two keys:
 
 - table_prefix:
   - If null: Takes all tables of current schema into account
   - If not null: Use the given prefix to filter tables
   - Example: "CO" will be expanded to `table_name like 'CO\_%' escape '\'`
 - dry_run:
-  - If true: Will do the intended script work
-  - If false: Will only report the intended script work and do nothing
+  - If true, the script will do the intended work
+  - If false, the script will only report the intended work and do nothing
+  - If omitted, it will default to false
 
 */
 
