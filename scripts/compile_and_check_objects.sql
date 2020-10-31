@@ -15,11 +15,12 @@ The first parameter of the script can contain a JSON object with one key:
   - If false, the script will only report the invalid objects
   - If omitted, it will default to true
 
-Usage
------
-- `@compile_and_check_objects`
-- `@compile_and_check_objects '{ throw_error: true }'`  (terminate when invalid objects exists after compilation)
-- `@compile_and_check_objects '{ throw_error: false }'` (report only invalid objects)
+Examples
+--------
+
+    @compile_and_check_objects
+    @compile_and_check_objects "{ throw_error: true  }"
+    @compile_and_check_objects "{ throw_error: false }"
 
 Meta
 ----
@@ -30,7 +31,7 @@ Meta
 */
 
 prompt COMPILE AND CHECK OBJECTS
-set define on serveroutput on verify off feedback off
+set define on serveroutput on verify off feedback off linesize 120
 variable options     varchar2(4000)
 variable throw_error varchar2(100)
 
@@ -48,7 +49,7 @@ declare
     end loop;
   end;
 begin
-  :options                 := '&1';
+  :options                 := q'[&1]';
   :throw_error             := nvl(json_value(:options, '$.throw_error'), 'true');
   l_number_invalid_objects := get_number_invalid_objects;
   if get_number_invalid_objects = 0 then
