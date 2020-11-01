@@ -7,11 +7,11 @@ begin
     select *
       from user_tables
      where table_name in (
-             'USERS',
-             'MAP_USERS_ROLES',
-             'ROLES',
-             'MAP_ROLES_RIGHTS',
-             'RIGHTS'
+             'AUTH_USERS',
+             'AUTH_MAP_USERS_ROLES',
+             'AUTH_ROLES',
+             'AUTH_MAP_ROLES_RIGHTS',
+             'AUTH_RIGHTS'
            )
   ) loop
     v_ddl := 'drop table ' || i.table_name || ' cascade constraints purge';

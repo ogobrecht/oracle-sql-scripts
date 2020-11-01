@@ -1,6 +1,6 @@
-prompt - create table users
+prompt - create table auth_users
 declare
-  v_name varchar2(30 char) := 'USERS';
+  v_name varchar2(30 char) := 'AUTH_USERS';
 begin
   for i in (
     select v_name from dual
@@ -9,7 +9,7 @@ begin
   )
   loop
     execute immediate q'{
-      create table users (
+      create table auth_users (
         u_name            varchar2(15 char)  not null,
         u_first_name      varchar2(30 char)  ,
         u_last_name       varchar2(30 char)  ,

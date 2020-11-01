@@ -1,6 +1,6 @@
-prompt - create table map_users_roles
+prompt - create table auth_map_users_roles
 declare
-  v_name varchar2(30 char) := 'MAP_USERS_ROLES';
+  v_name varchar2(30 char) := 'AUTH_MAP_USERS_ROLES';
 begin
   for i in (
     select v_name from dual
@@ -9,7 +9,7 @@ begin
   )
   loop
     execute immediate q'{
-      create table map_users_roles (
+      create table auth_map_users_roles (
         mur_u_name  varchar2(15 char)  not null,
         mur_ro_id   integer            not null,
         --

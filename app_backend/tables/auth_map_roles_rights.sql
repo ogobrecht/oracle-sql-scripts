@@ -1,6 +1,6 @@
-prompt - create table map_roles_rights
+prompt - create table auth_map_roles_rights
 declare
-  v_name varchar2(30 char) := 'MAP_ROLES_RIGHTS';
+  v_name varchar2(30 char) := 'AUTH_MAP_ROLES_RIGHTS';
 begin
   for i in (
     select v_name from dual
@@ -9,7 +9,7 @@ begin
   )
   loop
     execute immediate q'{
-      create table map_roles_rights (
+      create table auth_map_roles_rights (
         mrr_ro_id  integer  not null,
         mrr_ri_id  integer  not null,
         --
