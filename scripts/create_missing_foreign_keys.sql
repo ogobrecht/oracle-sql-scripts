@@ -18,12 +18,17 @@ This script is new and not heavily tested. It will currently only work with some
 Options
 -------
 
-The first parameter of the script can contain two options:
+The first parameter of the script can contain three options:
 
 - table_filter:
   - A like expression (escape char is '\')
   - Example: `table_filter=CO\_%` will be expanded to `table_name like 'CO\_%' escape '\'`
   - If omitted, it will default to '%' (matches all tables)
+- exclude_list:
+  - A comma separated list of TABLE_NAME:COLUMN_NAME:TARGET_TABLE_NAME keys which should exluded from the potential foreign key list
+  - Example: `MY_TAB_1:COL3:MY_TARGET_TAB1,MY_TAB_2:COL3:MY_TARGET_TAB2`
+  - This can be useful in rare cases to suppress false positives (I was not able to find another way without losing correct candidates or blow up the number of false positives)
+  - If omitted, it will default to 'no_list_entries' (which results in no filtered potential foreign keys)
 - dry_run:
   - `dry_run=true` will only report the intended work and do nothing
   - `dry_run=false` will do the intended work
@@ -34,6 +39,7 @@ Examples
 
     @create_missing_foreign_keys.sql "table_filter=%  dry_run=true"
     @create_missing_foreign_keys.sql "table_filter=CO\_%  dry_run=false"
+    @create_missing_foreign_keys.sql "table_filter=CO\_%  dry_run=false exclude_list=MY_TAB_1:COL3:MY_TARGET_TAB1,MY_TAB_2:COL3:MY_TARGET_TAB2"
 
 Meta
 ----
@@ -48,10 +54,12 @@ set define on serveroutput on verify off feedback off linesize 120
 
 declare
   v_table_filter varchar2(100);
+  v_exclude_list varchar2(1000);
   v_dry_run      varchar2(100);
   v_count        pls_integer := 0;
 begin
   v_table_filter := nvl(regexp_substr('&1','table_filter=([^ ]*)',1,1,'i',1), '%');
+  v_exclude_list := nvl(regexp_substr('&1','exclude_list=([^ ]*)',1,1,'i',1), 'no_list_entries');
   v_dry_run := nvl(lower(regexp_substr('&1','dry_run=(true|false)',1,1,'i',1)), 'true');
   if v_table_filter = '%' then
     dbms_output.put_line('- for all tables');
@@ -104,10 +112,12 @@ potential_foreign_keys as (
     join user_tab_cols utc on ut.table_name = utc.table_name
     join primary_keys  pk  on (-- column names without prefixes
                                utc.column_name like '%' || pk.combined_name
+                               and instr(v_exclude_list, utc.table_name||':'||utc.column_name||':'||pk.table_name) = 0
                                or
                                -- column names with prefixes
                                utc.column_name like '%\_' || pk.column_name escape '\'
                                and instr(pk.column_name, '_') > 0 --> no simple "id", at least something like "xxx_yy"
+                               and instr(v_exclude_list, utc.table_name||':'||utc.column_name||':'||pk.table_name) = 0
                                )
   where
     ut.table_name not like 'BIN$%'
