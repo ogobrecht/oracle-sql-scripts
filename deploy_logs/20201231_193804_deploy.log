@@ -1,0 +1,107 @@
+
+Start Example Deployment
+================================================================================
+DROP EXISTING DEMO TABLES
+- drop table AUTH_ROLES cascade constraints purge
+- drop table AUTH_MAP_ROLES_TO_RIGHTS cascade constraints purge
+- drop table AUTH_USERS cascade constraints purge
+- drop table AUTH_RIGHTS cascade constraints purge
+- drop table AUTH_MAP_USERS_TO_ROLES cascade constraints purge
+- 5 tables dropped
+CREATE TABLES
+- run demo_tables/auth_users
+- run demo_tables/auth_map_users_to_roles
+- run demo_tables/auth_roles
+- run demo_tables/auth_map_roles_to_rights
+- run demo_tables/auth_rights
+CREATE MISSING FOREIGN KEYS
+- for tables prefixed with 'AUTH'
+- alter table AUTH_MAP_ROLES_TO_RIGHTS modify RIGHT_ID references AUTH_RIGHTS
+- alter table AUTH_MAP_ROLES_TO_RIGHTS modify ROLE_ID references AUTH_ROLES
+- alter table AUTH_MAP_USERS_TO_ROLES modify ROLE_ID references AUTH_ROLES
+- alter table AUTH_MAP_USERS_TO_ROLES modify USER_ID references AUTH_USERS
+- alter table AUTH_USERS modify MANAGER_USER_ID references AUTH_USERS
+- 5 foreign keys created
+CREATE MISSING FOREIGN KEY INDEXES
+- for tables prefixed with 'AUTH'
+- create index AUTH_USERS_C5_FK_IX on AUTH_USERS (MANAGER_USER_ID)
+- create index AUTH_MAP_USERS_TO_ROLES_C2_FK_IX on AUTH_MAP_USERS_TO_ROLES (ROLE_ID)
+- create index AUTH_MAP_ROLES_TO_RIGHTS_C2_FK_IX on AUTH_MAP_ROLES_TO_RIGHTS (RIGHT_ID)
+- 3 indexes created
+UNIFY CONSTRAINT NAMES
+- for tables prefixed with 'AUTH'
+- alter table AUTH_MAP_ROLES_TO_RIGHTS rename constraint SYS_C0031476 to AUTH_MAP_ROLES_TO_RIGHTS_C1_C2_PK
+- alter table AUTH_MAP_ROLES_TO_RIGHTS rename constraint SYS_C0031484 to AUTH_MAP_ROLES_TO_RIGHTS_C1_FK
+- alter table AUTH_MAP_ROLES_TO_RIGHTS rename constraint SYS_C0031474 to AUTH_MAP_ROLES_TO_RIGHTS_C1_NN
+- alter table AUTH_MAP_ROLES_TO_RIGHTS rename constraint SYS_C0031483 to AUTH_MAP_ROLES_TO_RIGHTS_C2_FK
+- alter table AUTH_MAP_ROLES_TO_RIGHTS rename constraint SYS_C0031475 to AUTH_MAP_ROLES_TO_RIGHTS_C2_NN
+- alter table AUTH_MAP_USERS_TO_ROLES rename constraint SYS_C0031467 to AUTH_MAP_USERS_TO_ROLES_C1_C2_PK
+- alter table AUTH_MAP_USERS_TO_ROLES rename constraint SYS_C0031486 to AUTH_MAP_USERS_TO_ROLES_C1_FK
+- alter table AUTH_MAP_USERS_TO_ROLES rename constraint SYS_C0031465 to AUTH_MAP_USERS_TO_ROLES_C1_NN
+- alter table AUTH_MAP_USERS_TO_ROLES rename constraint SYS_C0031485 to AUTH_MAP_USERS_TO_ROLES_C2_FK
+- alter table AUTH_MAP_USERS_TO_ROLES rename constraint SYS_C0031466 to AUTH_MAP_USERS_TO_ROLES_C2_NN
+- alter table AUTH_RIGHTS rename constraint SYS_C0031477 to AUTH_RIGHTS_C1_NN
+- alter table AUTH_RIGHTS rename constraint SYS_C0031481 to AUTH_RIGHTS_C1_PK
+- alter table AUTH_RIGHTS rename constraint SYS_C0031478 to AUTH_RIGHTS_C2_NN
+- alter table AUTH_RIGHTS rename constraint SYS_C0031482 to AUTH_RIGHTS_C2_UK
+- alter table AUTH_RIGHTS rename constraint SYS_C0031480 to AUTH_RIGHTS_C4_CK
+- alter table AUTH_RIGHTS rename constraint SYS_C0031479 to AUTH_RIGHTS_C4_NN
+- alter table AUTH_ROLES rename constraint SYS_C0031468 to AUTH_ROLES_C1_NN
+- alter table AUTH_ROLES rename constraint SYS_C0031472 to AUTH_ROLES_C1_PK
+- alter table AUTH_ROLES rename constraint SYS_C0031469 to AUTH_ROLES_C2_NN
+- alter table AUTH_ROLES rename constraint SYS_C0031473 to AUTH_ROLES_C2_UK
+- alter table AUTH_ROLES rename constraint SYS_C0031471 to AUTH_ROLES_C4_CK
+- alter table AUTH_ROLES rename constraint SYS_C0031470 to AUTH_ROLES_C4_NN
+- alter table AUTH_USERS rename constraint SYS_C0031460 to AUTH_USERS_C1_CK
+- alter table AUTH_USERS rename constraint SYS_C0031457 to AUTH_USERS_C1_NN
+- alter table AUTH_USERS rename constraint SYS_C0031463 to AUTH_USERS_C1_PK
+- alter table AUTH_USERS rename constraint SYS_C0031461 to AUTH_USERS_C4_CK
+- alter table AUTH_USERS rename constraint SYS_C0031458 to AUTH_USERS_C4_NN
+- alter table AUTH_USERS rename constraint SYS_C0031464 to AUTH_USERS_C4_UK
+- alter table AUTH_USERS rename constraint SYS_C0031487 to AUTH_USERS_C5_FK
+- alter table AUTH_USERS rename constraint SYS_C0031462 to AUTH_USERS_C6_CK
+- alter table AUTH_USERS rename constraint SYS_C0031459 to AUTH_USERS_C6_NN
+- 31 constraints renamed
+UNIFY INDEX NAMES
+- for tables prefixed with 'AUTH'
+- alter index SYS_C0031476 rename to AUTH_MAP_ROLES_TO_RIGHTS_C1_C2_PK_IX
+- alter index SYS_C0031467 rename to AUTH_MAP_USERS_TO_ROLES_C1_C2_PK_IX
+- alter index SYS_C0031481 rename to AUTH_RIGHTS_C1_PK_IX
+- alter index SYS_C0031482 rename to AUTH_RIGHTS_C2_UK_IX
+- alter index SYS_C0031472 rename to AUTH_ROLES_C1_PK_IX
+- alter index SYS_C0031473 rename to AUTH_ROLES_C2_UK_IX
+- alter index SYS_C0031463 rename to AUTH_USERS_C1_PK_IX
+- alter index SYS_C0031464 rename to AUTH_USERS_C4_UK_IX
+- 8 indexes renamed
+DISABLE FOREIGN KEY CONSTRAINTS
+- for tables prefixed with 'AUTH'
+- alter table AUTH_USERS disable constraint AUTH_USERS_C5_FK
+- alter table AUTH_MAP_USERS_TO_ROLES disable constraint AUTH_MAP_USERS_TO_ROLES_C2_FK
+- alter table AUTH_MAP_USERS_TO_ROLES disable constraint AUTH_MAP_USERS_TO_ROLES_C1_FK
+- alter table AUTH_MAP_ROLES_TO_RIGHTS disable constraint AUTH_MAP_ROLES_TO_RIGHTS_C2_FK
+- alter table AUTH_MAP_ROLES_TO_RIGHTS disable constraint AUTH_MAP_ROLES_TO_RIGHTS_C1_FK
+- 5 foreign keys disabled
+LOAD INITIAL DATA
+- table auth_users, 2 rows
+- table auth_map_users_to_roles, 2 rows
+- table auth_roles, 4 rows
+- table auth_map_roles_to_rights, 10 rows
+- table auth_rights, 4 rows
+SYNC SEQUENCE VALUES TO DATA
+- for tables prefixed with 'AUTH'
+- tab:AUTH_RIGHTS col:ID seq:ISEQ$$_87290 typ:IDENTITY_COLUMN
+- tab:AUTH_ROLES col:ID seq:ISEQ$$_87284 typ:IDENTITY_COLUMN
+- 2 implicit sequences (from identity columns) synced to data
+ENABLE FOREIGN KEY CONSTRAINTS
+- for tables prefixed with 'AUTH'
+- alter table AUTH_USERS enable constraint AUTH_USERS_C5_FK
+- alter table AUTH_MAP_USERS_TO_ROLES enable constraint AUTH_MAP_USERS_TO_ROLES_C2_FK
+- alter table AUTH_MAP_USERS_TO_ROLES enable constraint AUTH_MAP_USERS_TO_ROLES_C1_FK
+- alter table AUTH_MAP_ROLES_TO_RIGHTS enable constraint AUTH_MAP_ROLES_TO_RIGHTS_C2_FK
+- alter table AUTH_MAP_ROLES_TO_RIGHTS enable constraint AUTH_MAP_ROLES_TO_RIGHTS_C1_FK
+- 5 foreign keys enabled
+timing for: deployment
+Elapsed: 00:00:03.81
+================================================================================
+Deployment Finished
+

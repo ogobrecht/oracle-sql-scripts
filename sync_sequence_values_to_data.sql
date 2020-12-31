@@ -1,14 +1,13 @@
 /*
 
 Sync Sequence Values To Data
-============================
+----------------------------
 
 Set sequence values to the current max data values. This is done for implicit
 sequences (identity columns) and explicit sequences (used as column default
 value or in a trigger).
 
-Options
--------
+OPTIONS
 
 The first parameter of the script can contain two options:
 
@@ -21,14 +20,13 @@ The first parameter of the script can contain two options:
   - `dry_run=false` will do the intended work
   - If omitted, it will default to true
 
-Examples
---------
+EXAMPLES
 
     @sync_sequence_values_to_data.sql "dry_run=true"
     @sync_sequence_values_to_data.sql "table_prefix=co  dry_run=false"
 
-Meta
-----
+META
+
 - Author: [Ottmar Gobrecht](https://ogobrecht.github.io)
 - Script: [sync_sequence_values_to_data.sql …](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/scripts/)
 - Last Update: 2020-12-12

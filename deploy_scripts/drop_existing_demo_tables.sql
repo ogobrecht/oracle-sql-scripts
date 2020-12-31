@@ -8,9 +8,9 @@ begin
       from user_tables
      where table_name in (
              'AUTH_USERS',
-             'AUTH_MAP_USERS_ROLES',
+             'AUTH_MAP_USERS_TO_ROLES',
              'AUTH_ROLES',
-             'AUTH_MAP_ROLES_RIGHTS',
+             'AUTH_MAP_ROLES_TO_RIGHTS',
              'AUTH_RIGHTS'
            )
   ) loop

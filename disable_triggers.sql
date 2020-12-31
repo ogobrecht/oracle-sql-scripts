@@ -1,10 +1,11 @@
 /*
 
-Disable Foreign Key Constraints
-===============================
+Disable Triggers
+----------------
 
-Options
--------
+For each table in the result set disable all triggers.
+
+OPTIONS
 
 The first parameter of the script can contain two options:
 
@@ -17,28 +18,28 @@ The first parameter of the script can contain two options:
   - `dry_run=false` will do the intended work
   - If omitted, it will default to true
 
-Examples
---------
+EXAMPLES
 
-    @disable_foreign_key_constraints.sql "dry_run=true"
-    @disable_foreign_key_constraints.sql "table_prefix=co  dry_run=false"
+    @disable_triggers.sql "dry_run=true"
+    @disable_triggers.sql "table_prefix=co  dry_run=false"
 
-Meta
-----
+META
+
 - Author: [Ottmar Gobrecht](https://ogobrecht.github.io)
-- Script: [disable_foreign_key_constraints.sql …](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/scripts/)
+- Script: [disable_triggers.sql …](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/scripts/)
 - Last Update: 2020-12-12
 
 */
 
-prompt DISABLE FOREIGN KEY CONSTRAINTS
+prompt DISABLE TRIGGERS
 set define on serveroutput on verify off feedback off linesize 120
 
 declare
-  v_table_prefix varchar2(100);
+  v_table_prefix   varchar2(100);
   v_table_filter varchar2(100);
-  v_dry_run      varchar2(100);
-  v_count        pls_integer := 0;
+  v_dry_run        varchar2(100);
+  v_count_tables   pls_integer := 0;
+  v_count_triggers pls_integer := 0;
 begin
   v_table_prefix := rtrim(upper(regexp_substr('&1','table_prefix=([^ ]*)',1,1,'i',1)),'_');
   v_dry_run      := nvl(lower(regexp_substr('&1','dry_run=(true|false)',1,1,'i',1)), 'true');
@@ -56,27 +57,30 @@ begin
 --------------------------------------------------------------------------------
 select
   table_name,
-  constraint_name,
-  status,
-  'alter table ' || table_name || ' disable constraint ' || constraint_name as ddl
+  count(*) as number_triggers,
+  'alter table ' || table_name || ' disable all triggers' as ddl
 from
-  user_constraints
+  user_triggers
 where
-  table_name like v_table_filter escape '\'
-  and table_name not like 'BIN$%'
-  and constraint_type = 'R'
+  base_object_type = 'TABLE'
+  and table_name like v_table_filter escape '\'
   and status = 'ENABLED'
+group by
+  table_name
 --------------------------------------------------------------------------------
   ) loop
     dbms_output.put_line('- ' || i.ddl);
     if v_dry_run = 'false' then
       execute immediate i.ddl;
     end if;
-    v_count := v_count + 1;
+    v_count_tables := v_count_tables + 1;
+    v_count_triggers := v_count_triggers + i.number_triggers;
   end loop;
 
-  dbms_output.put_line('- ' || v_count || ' foreign key'
-    || case when v_count != 1 then 's' end || ' '
+  dbms_output.put_line('- ' || v_count_triggers
+    || ' trigger' || case when v_count_tables != 1 then 's' end
+    || ' from ' || v_count_tables
+    || ' table' || case when v_count_tables != 1 then 's' end || ' '
     || case when v_dry_run = 'false' then 'disabled' else 'reported' end);
 end;
 /
