@@ -28,8 +28,8 @@ EXAMPLES
 META
 
 - Author: [Ottmar Gobrecht](https://ogobrecht.github.io)
-- Script: [sync_sequence_values_to_data.sql …](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/scripts/)
-- Last Update: 2020-12-12
+- Script: [sync_sequence_values_to_data.sql …](https://github.com/ogobrecht/oracle-sql-scripts/)
+- Last Update: 2020-12-31
 - Inspiration: https://stackoverflow.com/questions/51470/how-do-i-reset-a-sequence-in-oracle
 
 */

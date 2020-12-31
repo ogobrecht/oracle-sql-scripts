@@ -24,8 +24,8 @@ EXAMPLES
 META
 
 - Author: [Ottmar Gobrecht](https://ogobrecht.github.io)
-- Script: [disable_foreign_key_constraints.sql …](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/scripts/)
-- Last Update: 2020-12-12
+- Script: [disable_foreign_key_constraints.sql …](https://github.com/ogobrecht/oracle-sql-scripts/)
+- Last Update: 2020-12-31
 
 */
 

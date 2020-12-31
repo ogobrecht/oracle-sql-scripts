@@ -63,8 +63,8 @@ EXAMPLES
 META
 
 - Author: [Ottmar Gobrecht](https://ogobrecht.github.io)
-- Script: [create_missing_foreign_keys.sql …](https://github.com/ogobrecht/oracle-sql-scripts/blob/master/scripts/)
-- Last Update: 2020-12-12
+- Script: [create_missing_foreign_keys.sql …](https://github.com/ogobrecht/oracle-sql-scripts/)
+- Last Update: 2020-12-31
 
 */
 
