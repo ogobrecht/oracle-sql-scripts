@@ -24,7 +24,7 @@ META
 
 - Author: [Ottmar Gobrecht](https://ogobrecht.github.io)
 - Script: [compile_and_check_objects.sql …](https://github.com/ogobrecht/oracle-sql-scripts/)
-- Last Update: 2020-12-31
+- Last Update: 2021-02-06
 
 */
 
@@ -35,15 +35,11 @@ declare
   v_throw_error varchar2(100);
   v_number_invalid_objects pls_integer;
   v_object_list            varchar2(4000);
-  function get_number_invalid_objects return number is
+  function get_number_invalid_objects return pls_integer is
+    v_count pls_integer;
   begin
-    for i in (
-      select count(*) as invalid_objects
-      from user_objects
-      where status = 'INVALID')
-    loop
-      return i.invalid_objects;
-    end loop;
+    select count(*) into v_count from user_objects where status = 'INVALID';
+    return v_count;
   end;
 begin
   v_throw_error := nvl(lower(regexp_substr('&1','throw_error=(true|false)',1,1,'i',1)), 'true');
