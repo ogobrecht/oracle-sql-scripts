@@ -32,7 +32,6 @@ set feedback off
 set linesize 120
 set trimout on
 set trimspool on
---set trimspool on
 whenever sqlerror exit sql.sqlcode rollback
 timing start deployment
 column date_time noprint new_val date_time
