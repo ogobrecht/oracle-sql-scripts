@@ -152,8 +152,6 @@ select
   as new_constraint_name
 from
   constraints
-where
-  new_constraint_name != constraint_name
 )
 select
   table_name,
@@ -162,6 +160,8 @@ select
   'alter table ' || table_name || ' rename constraint ' || constraint_name || ' to ' || new_constraint_name as ddl
 from
   constraints_distinct
+where
+  new_constraint_name != constraint_name
 order by
   table_name,
   new_constraint_name,

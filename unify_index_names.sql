@@ -166,8 +166,6 @@ select
   as new_index_name
 from
   indexes_
-where
-  new_index_name != index_name
 )
 select
   table_name,
@@ -176,6 +174,8 @@ select
   'alter index ' || index_name || ' rename to ' || new_index_name as ddl
 from
   indexes_distinct
+where
+  new_index_name != index_name
 order by
   table_name,
   new_index_name,
