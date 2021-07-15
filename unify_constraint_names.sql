@@ -106,6 +106,7 @@ with constraints_base as (
   where
     uc.table_name like v_table_filter escape '\'
     and uc.constraint_type in ('C','P','U','R') -- only the types we can rename
+    and uc.constraint_name not like 'BIN$%'
     and uc.table_name not like 'BIN$%'
   group by
     uc.table_name,
@@ -121,7 +122,7 @@ constraints as (
     table_name,
     constraint_name,
     table_name || '_'
-      || listagg('C' || column_id, '_') within group(order by position)
+      || listagg('C' || lpad(column_id,2,'0'), '_') within group(order by position)
       || '_' || constraint_type
     as new_constraint_name,
     search_condition_vc
