@@ -15,11 +15,11 @@ numbers from 1 up to 9 if needed.
 
 Example constraint names:
 
-    OEHR_EMPLOYEES_C1_NN
-    OEHR_EMPLOYEES_C1_PK
-    OEHR_EMPLOYEES_C4_UK
+    OEHR_EMPLOYEES_C01_NN
+    OEHR_EMPLOYEES_C01_PK
+    OEHR_EMPLOYEES_C04_UK
     OEHR_EMPLOYEES_C10_FK
-    OEHR_JOB_HISTORY_C2_C3_CK
+    OEHR_JOB_HISTORY_C02_C03_CK
 
 Only the constraint types C (check), P (primary key), U (unique key) and
 R (referential integrity, foreign key) are supported. Other constraint types
@@ -49,7 +49,7 @@ META
 
 - Author: [Ottmar Gobrecht](https://ogobrecht.github.io)
 - Script: [unify_constraint_names.sql …](https://github.com/ogobrecht/oracle-sql-scripts/)
-- Last Update: 2020-12-31
+- Last Update: 2021-07-15
 
 */
 
