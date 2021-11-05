@@ -6,20 +6,19 @@ Unify Constraint Names
 Unify the names of table constraints in the current schema to the following
 naming convention:
 
-    <table_name>_<column_list>_<constraint_type>
+    <table_name>_<constraint_type>_<column_list>
 
-Each column in the column list is constructed by concatenating the character `C`
-with the column id in the table. The column list is ordered by the column
-position in the constraint. To ensure distinct constraint names we append
-numbers from 1 up to 9 if needed.
+The column list is ordered by the column name. To ensure distinct constraint 
+names we append numbers from 1 up to 9 if needed.
 
 Example constraint names:
 
-    OEHR_EMPLOYEES_C01_NN
-    OEHR_EMPLOYEES_C01_PK
-    OEHR_EMPLOYEES_C04_UK
-    OEHR_EMPLOYEES_C10_FK
-    OEHR_JOB_HISTORY_C02_C03_CK
+    OEHR_EMPLOYEES_NN_EMPLOYEE_ID
+    OEHR_EMPLOYEES_PK_EMPLOYEE_ID
+    OEHR_EMPLOYEES_UK_EMAIL
+    OEHR_EMPLOYEES_FK_MANAGER_ID
+    OEHR_JOB_HISTORY_PK_EMPLOYEE_ID
+    OEHR_JOB_HISTORY_CK_END_DATE_START_DATE
 
 Only the constraint types C (check), P (primary key), U (unique key) and
 R (referential integrity, foreign key) are supported. Other constraint types
@@ -48,13 +47,13 @@ EXAMPLES
 META
 
 - Author: [Ottmar Gobrecht](https://ogobrecht.github.io)
-- Script: [unify_constraint_names.sql …](https://github.com/ogobrecht/oracle-sql-scripts/)
-- Last Update: 2021-07-15
+- Script: [unify_constraint_names.sql](https://github.com/ogobrecht/oracle-sql-scripts/)
+- Last Update: 2021-11-05
 
 */
 
 prompt UNIFY CONSTRAINT NAMES
-set define on serveroutput on verify off feedback off linesize 120
+set define on serveroutput on verify off feedback off linesize 240
 
 declare
   v_table_prefix varchar2(100);
@@ -96,8 +95,7 @@ with constraints_base as (
       else uc.constraint_type
     end as constraint_type,
     utc.column_name,
-    utc.column_id,
-    ucc.position
+    utc.column_id
   from
          user_constraints  uc
     left join user_cons_columns ucc on  uc.constraint_name = ucc.constraint_name
@@ -106,25 +104,21 @@ with constraints_base as (
   where
     uc.table_name like v_table_filter escape '\'
     and uc.constraint_type in ('C','P','U','R') -- only the types we can rename
-    and uc.constraint_name not like 'BIN$%'
-    and uc.table_name not like 'BIN$%'
+    and uc.table_name not like 'BIN$%'          -- no tables from the recycle bin
+    and uc.constraint_name not like 'BIN$%'     -- no constraints from the recycle bin
   group by
     uc.table_name,
     uc.constraint_name,
     uc.constraint_type,
     utc.column_name,
     utc.column_id,
-    ucc.position,
     uc.search_condition_vc
 ),
 constraints as (
   select
     table_name,
     constraint_name,
-    table_name || '_'
-      || listagg('C' || lpad(column_id,2,'0'), '_') within group(order by position)
-      || '_' || constraint_type
-    as new_constraint_name,
+    substr(table_name || '_' || constraint_type  || '_' || listagg(column_name, '_') within group(order by column_name), 1, 127) as new_constraint_name,
     search_condition_vc
   from
     constraints_base
