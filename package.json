@@ -19,6 +19,6 @@
   "devDependencies": {
     "chokidar-cli": "^2.1.0",
     "glob": "^7.1.6",
-    "husky": "^4.3.6"
+    "husky": "^4.3.8"
   }
 }
